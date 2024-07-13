@@ -1,0 +1,87 @@
+basePath: /users
+definitions:
+  model.Error:
+    properties:
+      error:
+        type: string
+    type: object
+  users.UserLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  users.UserRegister:
+    properties:
+      email:
+        type: string
+      fullName:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:7777
+info:
+  contact:
+    email: nuriddinovhamidjon2@gmail.com
+    name: Hamidjon
+  description: This is the Auth service of EcoSwap project
+  title: Auth Service
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: user uchun login
+      parameters:
+      - description: User Register
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Xato
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Login user
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the provided details
+      parameters:
+      - description: User Register
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserRegister'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Muvaffaqiyatli ro'yxatdan o'tdingiz
+          schema:
+            type: string
+        "400":
+          description: Xato
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Register a new user
+      tags:
+      - auth
+swagger: "2.0"
