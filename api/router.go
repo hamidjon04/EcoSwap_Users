@@ -18,7 +18,7 @@ import (
 
 // @host localhost:7777
 // @BasePath /users
-func Router(db *sql.DB) {
+func Router(db *sql.DB) *gin.Engine{
 	router := gin.Default()
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -27,4 +27,6 @@ func Router(db *sql.DB) {
 
 	router.POST("/register", h.Register)
 	router.POST("/login", h.Login)
+
+	return router
 }

@@ -17,6 +17,7 @@ type Config struct {
 	DB_PASSWORD  string
 	DB_NAME      string
 	SIGNING_KEY  string
+	REDIS_PORT   string
 }
 
 func Load() Config {
@@ -33,6 +34,7 @@ func Load() Config {
 	config.USER_SERVICE = cast.ToString(Coalesce("USER_SERVICE", "50051"))
 	config.USER_ROUTER = cast.ToString(Coalesce("USER_ROUTER", "50051"))
 	config.SIGNING_KEY = cast.ToString(Coalesce("SIGNING_KEY", "secret"))
+	config.REDIS_PORT = cast.ToString(Coalesce("REDIS_PORT", "6379"))
 
 	return config
 }
