@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"ecoswap/config"
 	"fmt"
+	_"github.com/lib/pq"
 )
 
 

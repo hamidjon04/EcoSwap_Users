@@ -5,9 +5,12 @@ import (
 	pb "ecoswap/genproto/users"
 	"ecoswap/model"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	"gopkg.in/gomail.v2"
 )
 
 type UsersRepo struct {
@@ -41,7 +44,7 @@ func (U *UsersRepo) GetUserByEmail(email string) (model.InfoUser, error) {
 	return resp, err
 }
 
-func (U *UsersRepo) StoreRefreshToken(req *model.RefreshToken)error{
+func (U *UsersRepo) StoreRefreshToken(req *model.RefreshToken) error {
 	query := `
 				INSERT INTO refresh_token(
 					user_id, token, expires_at)
@@ -148,16 +151,29 @@ func (U *UsersRepo) GetAllUsers(req *pb.FilterField) (*pb.Users, error) {
 	return &pb.Users{Users: users}, nil
 }
 
-func (U *UsersRepo) ResetPassword() {
+func (U *UsersRepo) ResetPassword(email *pb.Email) (*pb.Status, error) {
+	mail := gomail.NewMessage()
+	resp, err := U.GetUserByEmail(email.Email)
+	if err != nil {
+		log.Println(err)
+		return &pb.Status{
+			Status:  false,
+			Message: "Bazadan o'qishda xatolik yuz berdi",
+		}, err
+	}
+	mail.SetHeader("From", "nuriddinovhamidjon2@gmail.com")
+	mail.SetHeader("To", email.Email)
+	mail.SetHeader("Subject", "EcoSwap dasturiga kirish kodingiz")
 
+	mail.SetBody("Password")
 }
 
 func (U *UsersRepo) UpdateToken() {
 
 }
 
-func (U *UsersRepo) CancelToken(id *pb.UserId){
-	
+func (U *UsersRepo) CancelToken(id *pb.UserId) {
+
 }
 
 func (U *UsersRepo) GetEcoPointsByUser(userId *pb.UserId) (*pb.UserEcoPoints, error) {
