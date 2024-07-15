@@ -6,8 +6,7 @@ import (
 	"ecoswap/model"
 	"fmt"
 	"log"
-	"strconv"
-	"strings"
+	"math"
 	"time"
 
 	"gopkg.in/gomail.v2"
@@ -109,30 +108,34 @@ func (U *UsersRepo) DeleteProfile(userId *pb.UserId) (*pb.Status, error) {
 }
 
 func (U *UsersRepo) GetAllUsers(req *pb.FilterField) (*pb.Users, error) {
+	var total int32
 	query := `
 				SELECT 
-					id, username, full_name, eco_points
+					id, count(id), username, full_name, eco_points
 				FROM
 					auth_service_users
 				WHERE
 					deleted_at is null`
-	param := []string{}
 	arr := []interface{}{}
 
 	if len(req.FullName) > 0 {
-		query += " AND full_name = :full_name"
-		param = append(param, ":full_name")
+		query += " AND full_name = $1"
 		arr = append(arr, req.FullName)
 	}
-	if len(req.Limit) > 0 {
-		query += fmt.Sprintf(" limit %s", req.Limit)
-	}
-	if len(req.Offset) > 0 {
-		query += fmt.Sprintf(" offset %s", req.Offset)
+
+	err := U.Db.QueryRow(query, arr...).Scan(nil, &total, nil, nil, nil)
+	if err != nil {
+		log.Println(err)
+		return nil, err
 	}
 
-	for i, j := range param {
-		query = strings.Replace(query, j, "$"+strconv.Itoa(i+1), 1)
+	if req.Limit > 0 {
+		query += fmt.Sprintf(" limit %s", req.Limit)
+	} else {
+		req.Limit = total
+	}
+	if req.Offset > 0 {
+		query += fmt.Sprintf(" offset %s", req.Offset)
 	}
 
 	users := []*pb.User{}
@@ -142,13 +145,18 @@ func (U *UsersRepo) GetAllUsers(req *pb.FilterField) (*pb.Users, error) {
 	}
 	for rows.Next() {
 		var user pb.User
-		err := rows.Scan(&user.Id, &user.Username, &user.FullName, &user.EcoPoints)
+		err := rows.Scan(&user.Id, nil, &user.Username, &user.FullName, &user.EcoPoints)
 		if err != nil {
 			return &pb.Users{Users: users}, err
 		}
 		users = append(users, &user)
 	}
-	return &pb.Users{Users: users}, nil
+	return &pb.Users{
+		Users: users,
+		Total: total,
+		Page:  int32(math.Ceil(float64(total / req.Limit))),
+		Limit: req.Limit,
+	}, nil
 }
 
 func (U *UsersRepo) ResetPassword(email *pb.Email) (*pb.Status, error) {

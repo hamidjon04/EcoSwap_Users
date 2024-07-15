@@ -58,3 +58,12 @@ func(U *UsersService) GetAllUsers(ctx context.Context, req *pb.FilterField)(*pb.
 	}
 	return resp, nil
 }
+
+func(U *UsersService) GetEcoPointsByUser(ctx context.Context, req *pb.UserId)(*pb.UserEcoPoints, error){
+	resp, err := U.User.GetEcoPointsByUser(req)
+	if err != nil{
+		U.Logger.Error(fmt.Sprintf("Databazadan ma'lumotlarni olishda xato: %v", err))
+		return nil, err
+	}
+	return resp, nil
+}
