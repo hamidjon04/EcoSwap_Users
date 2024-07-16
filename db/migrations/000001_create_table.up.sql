@@ -17,6 +17,7 @@ create table IF NOT EXISTS refresh_token(
     user_id uuid references users(id),
     token text UNIQUE NOT NULL,
     expires_at bigint,
-    created_at timestamp DEFAULT CURRENT_TIMESTAMP
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+	deleted_at timestamp
 );
 

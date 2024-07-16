@@ -6,15 +6,12 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func ConnectRedis()*redis.Client{
+func ConnectRedis() *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
-		Addr: config.Load().REDIS_PORT,
+		Addr:     config.Load().REDIS_PORT,
 		Password: "",
-		DB: 0,
+		DB:       0,
 	})
 
 	return rdb
 }
-
-
-
