@@ -19,7 +19,7 @@ import (
 // @contact.email nuriddinovhamidjon2@gmail.com
 
 // @host localhost:7777
-// @BasePath /users
+// @BasePath /
 func Router(db *sql.DB, rdb *redis.Client) *gin.Engine{
 	router := gin.Default()
 
@@ -27,8 +27,15 @@ func Router(db *sql.DB, rdb *redis.Client) *gin.Engine{
 
 	h := handler.NewHandlerRepo(db, rdb)
 
-	router.POST("/register", h.Register)
-	router.POST("/login", h.Login)
+	auth := router.Group("/auth")
+	auth.POST("/register", h.Register)
+	auth.POST("/login", h.Login)
+	auth.POST("/resetPass", h.ResetPassword)
+	auth.POST("/logout", h.Logout)
+	auth.PUT("/updateToken", h.UpdateToken)
+	
+	
+	auth.POST("/updatePass", h.UpdatePassword)
 
 	return router
 }

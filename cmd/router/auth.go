@@ -1,23 +1,14 @@
 package auth
 
 import (
+	"database/sql"
 	"ecoswap/api"
 	"ecoswap/config"
-	"ecoswap/storage/postgres"
-	"ecoswap/storage/redis"
-	"log"
+
+	"github.com/redis/go-redis/v9"
 )
 
-func AuthRun(){
-	db, err := postgres.ConnectDB()
-	if err != nil{
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	rdb := redis.ConnectRedis()
-	defer rdb.Close()
-
+func AuthRun(db *sql.DB, rdb *redis.Client) {
 	r := api.Router(db, rdb)
 	r.Run(config.Load().USER_ROUTER)
 }

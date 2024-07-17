@@ -1,9 +1,30 @@
-basePath: /users
+basePath: /
 definitions:
   model.Error:
     properties:
       error:
         type: string
+    type: object
+  model.ResetPassword:
+    properties:
+      email:
+        type: string
+      newPassword:
+        type: string
+      oldPassword:
+        type: string
+    type: object
+  users.Email:
+    properties:
+      email:
+        type: string
+    type: object
+  users.Status:
+    properties:
+      message:
+        type: string
+      status:
+        type: boolean
     type: object
   users.UserLogin:
     properties:
@@ -32,7 +53,7 @@ info:
   title: Auth Service
   version: "1.0"
 paths:
-  /login:
+  /auth/login:
     post:
       consumes:
       - application/json
@@ -58,7 +79,42 @@ paths:
       summary: Login user
       tags:
       - auth
-  /register:
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Ushbu endpoint foydalanuvchini tizimdan chiqarish uchun ishlatiladi.
+      parameters:
+      - description: Bearer <access_token>
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid token or missing Authorization header
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to blacklist access token or cancel token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Foydalanuvchini tizimdan chiqarish
+      tags:
+      - auth
+  /auth/register:
     post:
       consumes:
       - application/json
@@ -82,6 +138,97 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
       summary: Register a new user
+      tags:
+      - auth
+  /auth/resetPass:
+    post:
+      consumes:
+      - application/json
+      description: Reset a user's password with the provided email
+      parameters:
+      - description: User Email
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/users.Email'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset successful
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Reset password
+      tags:
+      - auth
+  /auth/updatePass:
+    post:
+      consumes:
+      - application/json
+      description: Ushbu endpoint foydalanuvchi parolini yangilash uchun ishlatiladi.
+      parameters:
+      - description: Reset Password Payload
+        in: body
+        name: reset_password
+        required: true
+        schema:
+          $ref: '#/definitions/model.ResetPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful Response
+          schema:
+            $ref: '#/definitions/users.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/users.Status'
+      summary: Foydalanuvchi parolini yangilash
+      tags:
+      - auth
+  /auth/updateToken:
+    put:
+      consumes:
+      - application/json
+      description: Ushbu endpoint foydalanuvchi tokenini yangilash uchun ishlatiladi.
+      parameters:
+      - description: Bearer <access_token>
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: access_token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid token or missing Authorization header
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Foydalanuvchi tokenini yangilash
       tags:
       - auth
 swagger: "2.0"

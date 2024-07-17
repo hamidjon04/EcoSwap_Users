@@ -24,7 +24,7 @@ func NewUsersRepo(db *sql.DB) *UsersRepo {
 func (U *UsersRepo) Register(req *pb.UserRegister) error {
 	query := `
 				INSERT INTO auth_service_users(
-					username, email, password, full_name)
+					username, email, password_hash, full_name)
 				VALUES
 					($1, $2, $3, $4)`
 	_, err := U.Db.Exec(query, req.Username, req.Email, req.Password, req.FullName)
@@ -35,12 +35,12 @@ func (U *UsersRepo) GetUserByEmail(email string) (model.InfoUser, error) {
 	resp := model.InfoUser{}
 	query := `
 				SELECT 
-					id, username, password, full_name 
+					id, username, password_hash, full_name 
 				FROM
 					auth_service_users
 				WHERE
 					email = $1 AND deleted_at is null`
-	err := U.Db.QueryRow(query, email).Scan(&resp.Id, &resp.Username, &resp.Password, resp.FullName)
+	err := U.Db.QueryRow(query, email).Scan(&resp.Id, &resp.Username, &resp.Password, &resp.FullName)
 	return resp, err
 }
 
@@ -181,7 +181,7 @@ func (U *UsersRepo) GetAllUsers(req *pb.FilterField) (*pb.Users, error) {
 
 func (U *UsersRepo) ResetPassword(email *pb.Email) (*pb.Status, error) {
 	resp, err := U.GetUserByEmail(email.Email)
-	if err != nil || resp.Id != "" {
+	if err != nil || resp.Id == "" {
 		log.Println(err)
 		return &pb.Status{
 			Status:  false,
@@ -193,7 +193,7 @@ func (U *UsersRepo) ResetPassword(email *pb.Email) (*pb.Status, error) {
 	mail.SetHeader("To", email.Email)
 	mail.SetHeader("Subject", "Kodni yangilash uchun link")
 
-	mail.SetBody("URL", "localhost:port/swagger/users/updateProfile")
+	mail.SetBody("URL", "localhost:7777/swagger/auth/updatePass/index.html#/auth/post_auth_updatePass")
 
 	d := gomail.NewDialer("smtp.gmail.com", 587, "nuriddinovhamidjon2@gmail.com", "qkrj oxld lshb dgte")
 
@@ -219,7 +219,7 @@ func (U *UsersRepo) UpdatePassword(req *model.ResetPassword) (*pb.Status, error)
 		}, err
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(req.OldPassword), []byte(resp.Password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(resp.Password), []byte(req.OldPassword)); err != nil {
 		log.Println(err)
 		return &pb.Status{
 			Status:  false,
@@ -234,11 +234,11 @@ func (U *UsersRepo) UpdatePassword(req *model.ResetPassword) (*pb.Status, error)
 	}
 
 	query := `
-				UPDATE auth_service_users SET
-					password_hash = $1, updated_at = $2
-				WHERE 
-					email = $3`
-	_, err = U.Db.Exec(query, hashpassword, time.Now(), req.Email)
+		UPDATE auth_service_users SET
+			password_hash = $1, updated_at = $2
+		WHERE 
+			email = $3`
+	_, err = U.Db.Exec(query, string(hashpassword), time.Now(), req.Email)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -248,6 +248,7 @@ func (U *UsersRepo) UpdatePassword(req *model.ResetPassword) (*pb.Status, error)
 		Message: "Parolingiz yangilandi",
 	}, nil
 }
+
 
 func(U *UsersRepo) UpdateToken(token *model.RefreshToken)error{
 	query := `
@@ -285,4 +286,30 @@ func (U *UsersRepo) GetEcoPointsByUser(userId *pb.UserId) (*pb.UserEcoPoints, er
 					id = $1 AND deleted_at is null`
 	err := U.Db.QueryRow(query, userId.Id).Scan(&resp.UserId, &resp.EcoPoints, &resp.LastUpdated)
 	return &resp, err
+}
+
+
+func(h *UsersRepo) CreateEcoPointsByUser(req *pb.CreateEcoPoints)(*pb.InfoUserEcoPoints, error){
+	user, err := h.GetEcoPointsByUser(&pb.UserId{Id: req.UserId})
+	if err != nil{
+		log.Println(err)
+		return nil, err
+	}
+	query := `
+				UPDATE auth_service_users SET
+					eco_points = $1, updated_at = $2
+				WHERE 
+					id = $3 AND deleted_at is null`
+	_, err = h.Db.Exec(query, user.EcoPoints + req.EcoPoints, time.Now(), req.UserId)
+	if err != nil{
+		log.Println(err)
+		return nil, err
+	}
+	return &pb.InfoUserEcoPoints{
+		UserId: req.UserId,
+		EcoPoints: user.EcoPoints + req.EcoPoints,
+		AddedPoints: req.EcoPoints,
+		Reason: req.Reason,
+		Date: time.Now().Format("16-07-2024"),
+	}, err
 }

@@ -23,7 +23,7 @@ func GenerateJWT(user *pb.GenerateUserJWT) *pb.Token {
 	accessClaim["exp"] = time.Now().Add(time.Hour).Unix()
 
 	cfg := config.Load()
-	access, err := accessToken.SignedString(cfg.SIGNING_KEY)
+	access, err := accessToken.SignedString([]byte(cfg.SIGNING_KEY))
 	if err != nil {
 		log.Fatalf("Access tokenni generatsiya qilishda xato: %v", err)
 	}
@@ -36,7 +36,7 @@ func GenerateJWT(user *pb.GenerateUserJWT) *pb.Token {
 	refreshClaim["iat"] = time.Now().Unix()
 	refreshClaim["exp"] = time.Now().Add(24 * time.Hour).Unix()
 
-	refresh, err := refreshToken.SignedString(cfg.SIGNING_KEY)
+	refresh, err := refreshToken.SignedString([]byte(cfg.SIGNING_KEY))
 	if err != nil {
 		log.Fatalf("Refresh tokenni generatsiya qilishda xato: %v", err)
 	}
