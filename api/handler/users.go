@@ -24,7 +24,7 @@ import (
 // @Param user body users.UserRegister true "User Register"
 // @Success 200 {string} string "Muvaffaqiyatli ro'yxatdan o'tdingiz"
 // @Failure 400 {object} model.Error "Xato"
-// @Router /register [post]
+// @Router /auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
 	req := pb.UserRegister{}
 
@@ -60,7 +60,7 @@ func (h *Handler) Register(c *gin.Context) {
 // @Param user body users.UserLogin true "User Register"
 // @Success 200 {string} users.Token
 // @Failure 400 {object} model.Error "Xato"
-// @Router /login [post]
+// @Router /auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	req := pb.UserLogin{}
 
@@ -78,8 +78,8 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(req.Password), []byte(user.Password)); err != nil {
-		c.JSON(http.StatusBadRequest, err)
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid credentials"})
 		h.Logger.Error(fmt.Sprintf("Parol xato: %v", err))
 		return
 	}
@@ -104,44 +104,75 @@ func (h *Handler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, token)
 }
 
+// @Summary Reset password
+// @Description Reset a user's password with the provided email
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param email body pb.Email true "User Email"
+// @Success 200 {string} string "Password reset successful"
+// @Failure 400 {object} string "Invalid request"
+// @Failure 500 {object} string "Internal server error"
+// @Router /auth/resetPass [post]
 func (h *Handler) ResetPassword(c *gin.Context) {
 	req := pb.Email{}
 
-	err := c.ShouldBindJSON(&req.Email)
+	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
 		h.Logger.Error(fmt.Sprintf("Ma'lumotlarni o'qishda xato: %v", err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
 	resp, err := h.UserRepo.ResetPassword(&req)
 	if err != nil {
 		h.Logger.Error(fmt.Sprintf("Bazada ma'lumotlar topilmadi: %v", err))
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reset password"})
 		return
 	}
 	c.JSON(http.StatusOK, resp)
 }
 
+
+// @Summary      Foydalanuvchi parolini yangilash
+// @Description  Ushbu endpoint foydalanuvchi parolini yangilash uchun ishlatiladi.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        reset_password  body      model.ResetPassword  true  "Reset Password Payload"
+// @Success      200             {object}  pb.Status            "Successful Response"
+// @Failure      400             {object}  pb.Status            "Bad Request"
+// @Router       /auth/updatePass [post]
 func (h *Handler) UpdatePassword(c *gin.Context) {
 	req := model.ResetPassword{}
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		h.Logger.Error(fmt.Sprintf("Ma'lumotlarni bodydan o'qishda xatolik: %v", err))
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, pb.Status{Status: false, Message: "Invalid request body"})
 		return
 	}
 
 	resp, err := h.UserRepo.UpdatePassword(&req)
 	if err != nil {
 		h.Logger.Error(fmt.Sprintf("Bazadan ma'lumotlarni olishda xato: %v", err))
-		c.JSON(http.StatusBadRequest, resp)
+		c.JSON(http.StatusBadRequest, pb.Status{Status: false, Message: "Failed to update password"})
 		return
 	}
 	c.JSON(http.StatusOK, resp)
 }
 
+
+// @Summary      Foydalanuvchini tizimdan chiqarish
+// @Description  Ushbu endpoint foydalanuvchini tizimdan chiqarish uchun ishlatiladi.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        Authorization header string true "Bearer <access_token>"
+// @Success      200  {object}  map[string]string  "Logout successful"
+// @Failure      400  {object}  map[string]string  "Invalid token or missing Authorization header"
+// @Failure      500  {object}  map[string]string  "Failed to blacklist access token or cancel token"
+// @Router       /auth/logout [post]
 func (h *Handler) Logout(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
@@ -187,6 +218,16 @@ func (h *Handler) Logout(c *gin.Context) {
 	}
 }
 
+// @Summary      Foydalanuvchi tokenini yangilash
+// @Description  Ushbu endpoint foydalanuvchi tokenini yangilash uchun ishlatiladi.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        Authorization header string true "Bearer <access_token>"
+// @Success      200  {object}  map[string]string  "access_token"
+// @Failure      400  {object}  map[string]string  "Invalid token or missing Authorization header"
+// @Failure      500  {object}  map[string]string  "Failed to update token"
+// @Router       /auth/updateToken [put]
 func (h *Handler) UpdateToken(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
@@ -217,11 +258,11 @@ func (h *Handler) UpdateToken(c *gin.Context) {
 	})
 
 	err = h.UserRepo.UpdateToken(&model.RefreshToken{
-		UserId: userID,
-		Token: token.RefreshToken,
+		UserId:    userID,
+		Token:     token.RefreshToken,
 		ExpiresAt: int64(time.Hour * 24),
 	})
-	if err != nil{
+	if err != nil {
 		h.Logger.Error("Yangi tokenni xotiraga yozishda xato: %v", err)
 		c.JSON(http.StatusBadRequest, err)
 		return

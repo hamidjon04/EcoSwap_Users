@@ -40,3 +40,6 @@ test:
 swag-gen:
 	~/go/bin/swag init -g ./api/router.go -o api/docs
 
+swag-fix:
+	go get -u github.com/swaggo/swag/cmd/swag
+

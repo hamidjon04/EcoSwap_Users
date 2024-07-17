@@ -22,3 +22,7 @@ type ResetPassword struct {
 type Error struct {
 	Error string
 }
+
+type Response struct{
+	Response string
+}

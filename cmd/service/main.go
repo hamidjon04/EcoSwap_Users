@@ -21,7 +21,9 @@ func main() {
 	defer rdb.Close()
 
 	router := api.Router(db, rdb)
-	go auth.AuthRun()
+	go auth.AuthRun(db, rdb)
 	time.Sleep(1 * time.Second)
 	router.Run(config.Load().USER_SERVICE)
 }
+
+

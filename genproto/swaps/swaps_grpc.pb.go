@@ -30,8 +30,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SwapsClient interface {
 	SendSwapRequest(ctx context.Context, in *SwapRequest, opts ...grpc.CallOption) (*SwapResponce, error)
-	AdoptionSwapRequest(ctx context.Context, in *SwapId, opts ...grpc.CallOption) (*AcceptResponce, error)
-	RejectionSwapRequest(ctx context.Context, in *SwapId, opts ...grpc.CallOption) (*Reason, error)
+	AdoptionSwapRequest(ctx context.Context, in *Reason, opts ...grpc.CallOption) (*Responce, error)
+	RejectionSwapRequest(ctx context.Context, in *Reason, opts ...grpc.CallOption) (*Responce, error)
 	GetAllSwapRequests(ctx context.Context, in *FilterField, opts ...grpc.CallOption) (*AllSwaps, error)
 }
 
@@ -53,9 +53,9 @@ func (c *swapsClient) SendSwapRequest(ctx context.Context, in *SwapRequest, opts
 	return out, nil
 }
 
-func (c *swapsClient) AdoptionSwapRequest(ctx context.Context, in *SwapId, opts ...grpc.CallOption) (*AcceptResponce, error) {
+func (c *swapsClient) AdoptionSwapRequest(ctx context.Context, in *Reason, opts ...grpc.CallOption) (*Responce, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AcceptResponce)
+	out := new(Responce)
 	err := c.cc.Invoke(ctx, Swaps_AdoptionSwapRequest_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -63,9 +63,9 @@ func (c *swapsClient) AdoptionSwapRequest(ctx context.Context, in *SwapId, opts 
 	return out, nil
 }
 
-func (c *swapsClient) RejectionSwapRequest(ctx context.Context, in *SwapId, opts ...grpc.CallOption) (*Reason, error) {
+func (c *swapsClient) RejectionSwapRequest(ctx context.Context, in *Reason, opts ...grpc.CallOption) (*Responce, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Reason)
+	out := new(Responce)
 	err := c.cc.Invoke(ctx, Swaps_RejectionSwapRequest_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -88,8 +88,8 @@ func (c *swapsClient) GetAllSwapRequests(ctx context.Context, in *FilterField, o
 // for forward compatibility
 type SwapsServer interface {
 	SendSwapRequest(context.Context, *SwapRequest) (*SwapResponce, error)
-	AdoptionSwapRequest(context.Context, *SwapId) (*AcceptResponce, error)
-	RejectionSwapRequest(context.Context, *SwapId) (*Reason, error)
+	AdoptionSwapRequest(context.Context, *Reason) (*Responce, error)
+	RejectionSwapRequest(context.Context, *Reason) (*Responce, error)
 	GetAllSwapRequests(context.Context, *FilterField) (*AllSwaps, error)
 	mustEmbedUnimplementedSwapsServer()
 }
@@ -101,10 +101,10 @@ type UnimplementedSwapsServer struct {
 func (UnimplementedSwapsServer) SendSwapRequest(context.Context, *SwapRequest) (*SwapResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendSwapRequest not implemented")
 }
-func (UnimplementedSwapsServer) AdoptionSwapRequest(context.Context, *SwapId) (*AcceptResponce, error) {
+func (UnimplementedSwapsServer) AdoptionSwapRequest(context.Context, *Reason) (*Responce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdoptionSwapRequest not implemented")
 }
-func (UnimplementedSwapsServer) RejectionSwapRequest(context.Context, *SwapId) (*Reason, error) {
+func (UnimplementedSwapsServer) RejectionSwapRequest(context.Context, *Reason) (*Responce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RejectionSwapRequest not implemented")
 }
 func (UnimplementedSwapsServer) GetAllSwapRequests(context.Context, *FilterField) (*AllSwaps, error) {
@@ -142,7 +142,7 @@ func _Swaps_SendSwapRequest_Handler(srv interface{}, ctx context.Context, dec fu
 }
 
 func _Swaps_AdoptionSwapRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SwapId)
+	in := new(Reason)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -154,13 +154,13 @@ func _Swaps_AdoptionSwapRequest_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: Swaps_AdoptionSwapRequest_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SwapsServer).AdoptionSwapRequest(ctx, req.(*SwapId))
+		return srv.(SwapsServer).AdoptionSwapRequest(ctx, req.(*Reason))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Swaps_RejectionSwapRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SwapId)
+	in := new(Reason)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -172,7 +172,7 @@ func _Swaps_RejectionSwapRequest_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: Swaps_RejectionSwapRequest_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SwapsServer).RejectionSwapRequest(ctx, req.(*SwapId))
+		return srv.(SwapsServer).RejectionSwapRequest(ctx, req.(*Reason))
 	}
 	return interceptor(ctx, in, info, handler)
 }

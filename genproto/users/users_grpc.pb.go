@@ -48,7 +48,7 @@ type UsersServiceClient interface {
 	CancelToken(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Status, error)
 	GetEcoPointsByUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*UserEcoPoints, error)
 	CreateEcoPointsByUser(ctx context.Context, in *CreateEcoPoints, opts ...grpc.CallOption) (*InfoUserEcoPoints, error)
-	HistoryEcoPointsByUser(ctx context.Context, in *HistoryReq, opts ...grpc.CallOption) (*HistoryUserPoints, error)
+	HistoryEcoPointsByUser(ctx context.Context, in *HistoryReq, opts ...grpc.CallOption) (*Histories, error)
 }
 
 type usersServiceClient struct {
@@ -169,9 +169,9 @@ func (c *usersServiceClient) CreateEcoPointsByUser(ctx context.Context, in *Crea
 	return out, nil
 }
 
-func (c *usersServiceClient) HistoryEcoPointsByUser(ctx context.Context, in *HistoryReq, opts ...grpc.CallOption) (*HistoryUserPoints, error) {
+func (c *usersServiceClient) HistoryEcoPointsByUser(ctx context.Context, in *HistoryReq, opts ...grpc.CallOption) (*Histories, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(HistoryUserPoints)
+	out := new(Histories)
 	err := c.cc.Invoke(ctx, UsersService_HistoryEcoPointsByUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -194,7 +194,7 @@ type UsersServiceServer interface {
 	CancelToken(context.Context, *Void) (*Status, error)
 	GetEcoPointsByUser(context.Context, *UserId) (*UserEcoPoints, error)
 	CreateEcoPointsByUser(context.Context, *CreateEcoPoints) (*InfoUserEcoPoints, error)
-	HistoryEcoPointsByUser(context.Context, *HistoryReq) (*HistoryUserPoints, error)
+	HistoryEcoPointsByUser(context.Context, *HistoryReq) (*Histories, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -235,7 +235,7 @@ func (UnimplementedUsersServiceServer) GetEcoPointsByUser(context.Context, *User
 func (UnimplementedUsersServiceServer) CreateEcoPointsByUser(context.Context, *CreateEcoPoints) (*InfoUserEcoPoints, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateEcoPointsByUser not implemented")
 }
-func (UnimplementedUsersServiceServer) HistoryEcoPointsByUser(context.Context, *HistoryReq) (*HistoryUserPoints, error) {
+func (UnimplementedUsersServiceServer) HistoryEcoPointsByUser(context.Context, *HistoryReq) (*Histories, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HistoryEcoPointsByUser not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
