@@ -131,19 +131,27 @@ func (U *UsersRepo) GetAllUsers(req *pb.FilterField) (*pb.Users, error) {
 	var total int32
 	query := `
 				SELECT 
-					id, count(id), username, full_name, eco_points
+					id, username, full_name, eco_points
 				FROM
 					auth_service_users
 				WHERE
 					deleted_at is null`
+	queryTotal := `
+					SELECT 
+						count(*)
+					FROM
+						auth_service_users
+					WHERE 
+						deleted_at is null`
 	arr := []interface{}{}
 
 	if len(req.FullName) > 0 {
 		query += " AND full_name = $1"
+		queryTotal += " AND full_name = $1"
 		arr = append(arr, req.FullName)
 	}
 
-	err := U.Db.QueryRow(query, arr...).Scan(nil, &total, nil, nil, nil)
+	err := U.Db.QueryRow(queryTotal, arr...).Scan(&total)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -165,7 +173,7 @@ func (U *UsersRepo) GetAllUsers(req *pb.FilterField) (*pb.Users, error) {
 	}
 	for rows.Next() {
 		var user pb.User
-		err := rows.Scan(&user.Id, nil, &user.Username, &user.FullName, &user.EcoPoints)
+		err := rows.Scan(&user.Id, &user.Username, &user.FullName, &user.EcoPoints)
 		if err != nil {
 			return &pb.Users{Users: users}, err
 		}

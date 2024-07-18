@@ -73,6 +73,7 @@ func(U *UsersService) GetEcoPointsByUser(ctx context.Context, req *pb.UserId)(*p
 	return resp, nil
 }
 func(U *UsersService) CreateEcoPointsByUser(ctx context.Context, req *pb.CreateEcoPoints)(*pb.InfoUserEcoPoints, error){
+	fmt.Println(11)
 	resp, err := U.User.CreateEcoPointsByUser(req)
 	if err != nil{
 		U.Logger.Error(fmt.Sprintf("Databazadan ma'lumotlarni olishda xato: %v", err))
