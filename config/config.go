@@ -29,7 +29,7 @@ func Load() Config {
 	config.DB_HOST = cast.ToString(Coalesce("DB_HOST", "localhost"))
 	config.DB_PORT = cast.ToString(Coalesce("DB_PORT", "5432"))
 	config.DB_USER = cast.ToString(Coalesce("DB_USER", "postgres"))
-	config.DB_PASSWORD = cast.ToString(Coalesce("DB_PASSWORD", "secret"))
+	config.DB_PASSWORD = cast.ToString(Coalesce("DB_PASSWORD", "hamidjon4424"))
 	config.DB_NAME = cast.ToString(Coalesce("DB_NAME", "ecoswap"))
 	config.USER_SERVICE = cast.ToString(Coalesce("USER_SERVICE", "50051"))
 	config.USER_ROUTER = cast.ToString(Coalesce("USER_ROUTER", "50051"))
