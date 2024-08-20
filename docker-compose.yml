@@ -6,8 +6,8 @@ services:
       - "5433:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1111
-      POSTGRES_DB: medicine
+      POSTGRES_PASSWORD: hamidjon4424
+      POSTGRES_DB: ecoswap
       PG_DATA: /var/lib/postgresql/data 
     volumes:
       - postgres-data:/var/lib/postgresql/data
