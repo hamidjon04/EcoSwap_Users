@@ -18,7 +18,6 @@ import (
 // @contact.name Hamidjon
 // @contact.email nuriddinovhamidjon2@gmail.com
 
-// @host localhost:7777
 // @BasePath /
 func Router(db *sql.DB, rdb *redis.Client) *gin.Engine{
 	router := gin.Default()
