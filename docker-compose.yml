@@ -20,7 +20,7 @@ services:
       - eco
     volumes:
       - ./migrations:/migrations
-    command: ["-path", "/migrations", "-database", "postgres://postgres:1111@postgres:5432/medicine?sslmode=disable", "up"]
+    command: ["-path", "/migrations", "-database", "postgres://postgres:hamidjon4424@postgres:5432/ecoswap?sslmode=disable", "up"]
     depends_on:
       - postgres-db
 
