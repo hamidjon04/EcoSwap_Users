@@ -44,7 +44,6 @@ definitions:
       username:
         type: string
     type: object
-host: localhost:7777
 info:
   contact:
     email: nuriddinovhamidjon2@gmail.com
