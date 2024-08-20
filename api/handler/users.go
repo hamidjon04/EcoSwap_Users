@@ -109,7 +109,7 @@ func (h *Handler) Login(c *gin.Context) {
 // @Tags auth
 // @Accept  json
 // @Produce  json
-// @Param email body pb.Email true "User Email"
+// @Param email body users.Email true "User Email"
 // @Success 200 {string} string "Password reset successful"
 // @Failure 400 {object} string "Invalid request"
 // @Failure 500 {object} string "Internal server error"
@@ -140,8 +140,8 @@ func (h *Handler) ResetPassword(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        reset_password  body      model.ResetPassword  true  "Reset Password Payload"
-// @Success      200             {object}  pb.Status            "Successful Response"
-// @Failure      400             {object}  pb.Status            "Bad Request"
+// @Success      200             {object}  users.Status            "Successful Response"
+// @Failure      400             {object}  users.Status            "Bad Request"
 // @Router       /auth/updatePass [post]
 func (h *Handler) UpdatePassword(c *gin.Context) {
 	req := model.ResetPassword{}
